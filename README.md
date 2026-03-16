@@ -1,92 +1,198 @@
-# 👨‍🏫 Thầy Giáo CNTT - Legendary Developer
+# 🚀 CI/CD Spring Boot với GitHub Actions & Docker Hub
 
-> "Code chạy là được, tối ưu để sau!" – Thầy
+## 📌 Giới thiệu
 
-## 🚀 Giới thiệu
+Dự án này minh họa cách sử dụng **GitHub Actions** để tự động hóa quy trình **CI/CD** cho ứng dụng **Java Spring Boot**.
 
-Đây là README giới thiệu về **thầy giáo dạy Công Nghệ Thông Tin** của tôi – một người vừa là **developer**, vừa là **debugger**, vừa là **Google sống** của cả lớp.
+Khi code được **push lên nhánh `main`**, hệ thống sẽ tự động:
 
-* 💻 Nghề nghiệp: Thầy giáo CNTT
-* 🧠 Chuyên môn: Code, sửa lỗi, và... bắt lỗi sinh viên
-* ☕ Nhiên liệu hoạt động: Cà phê + StackOverflow
-* 🎯 Mục tiêu: Biến sinh viên từ `Hello World` → `Full Stack Developer`
+1. Đăng nhập vào **Docker Hub**
+2. **Build Docker Image** từ `Dockerfile`
+3. **Push Docker Image** lên Docker Hub
 
----
-
-## 🧑‍💻 Skill Tree
-
-| Skill                 | Level |
-| --------------------- | ----- |
-| Debug code sinh viên  | ⭐⭐⭐⭐⭐ |
-| Giải thích thuật toán | ⭐⭐⭐⭐  |
-| Viết code siêu nhanh  | ⭐⭐⭐⭐  |
-| Phát hiện copy code   | ⭐⭐⭐⭐⭐ |
-| Humor trong giờ học   | ⭐⭐⭐   |
+Quy trình này giúp tự động hóa việc build và deploy ứng dụng.
 
 ---
 
-## 📚 Công nghệ thầy thường dạy
+# 🛠 Công nghệ sử dụng
 
-```text
-C
-C++
-Python
-Java
-HTML / CSS / JavaScript
-SQL
+* Java Spring Boot
+* Docker
+* GitHub Actions
+* Docker Hub
+* Maven
+
+---
+
+# 📂 Cấu trúc dự án
+
 ```
-
-Và đôi khi:
-
-```text
-Git
-Linux
-AI
+project-springboot/
+│
+├── src/
+├── pom.xml
+├── Dockerfile
+│
+└── .github
+    └── workflows
+        └── deploy.yml
 ```
 
 ---
 
-## 🧪 Quy trình chấm bài (theo truyền thuyết)
+# ⚙️ Bước 1: Tạo Repository GitHub
 
-```mermaid
-graph TD
-A[Nộp bài] --> B{Chạy được không?}
-B -->|Không| C[0 điểm 💀]
-B -->|Có| D{Copy không?}
-D -->|Có| E[Trừ điểm ⚠️]
-D -->|Không| F[Qua môn 🎉]
+Tạo repository trên GitHub và push source code dự án Spring Boot lên.
+
+```
+git init
+git add .
+git commit -m "Initial commit"
+git branch -M main
+git remote add origin <repo-url>
+git push -u origin main
 ```
 
 ---
 
-## 🧠 Quote nổi tiếng của thầy
+# 🔐 Bước 2: Cấu hình GitHub Secrets
 
-* “Lỗi không đáng sợ, **không biết sửa mới đáng sợ**.”
-* “Google không làm bài giúp em đâu.”
-* “Code chạy được chưa chắc đúng.”
+Vào:
+
+```
+Repository → Settings → Secrets and variables → Actions
+```
+
+Thêm 2 secrets:
+
+| Name               | Value                   |
+| ------------------ | ----------------------- |
+| DOCKERHUB_USERNAME | username docker hub     |
+| DOCKERHUB_TOKEN    | access token docker hub |
+
+Docker Hub Token tạo tại:
+
+```
+Docker Hub → Account Settings → Security → New Access Token
+```
+
+---
+
+# ⚡ Bước 3: Tạo GitHub Actions Workflow
+
+Tạo file:
+
+```
+.github/workflows/deploy.yml
+```
+
+Nội dung:
+
+```yaml
+name: Build and Push Docker Image
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Login Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/springboot-app:latest
+```
 
 ---
 
-## 🎮 Fun Facts
+# 🔄 Quy trình hoạt động
 
-* Thầy debug nhanh hơn sinh viên compile.
-* Có thể nhìn code 1 lần là biết lỗi.
-* Khi lớp im lặng → chắc chắn đang có bug.
+```
+Push code lên GitHub
+        ↓
+GitHub Actions trigger workflow
+        ↓
+Login Docker Hub
+        ↓
+Build Docker Image
+        ↓
+Push Image lên Docker Hub
+```
+
+---
+
+# 🐳 Docker Image
+
+Sau khi workflow chạy thành công, image sẽ được push lên:
+
+```
+https://hub.docker.com/
+```
+
+Ví dụ:
+
+```
+docker pull username/springboot-app:latest
+```
 
 ---
 
-## 🏆 Thành tựu
+# ▶️ Chạy container
 
-* Dạy hàng trăm sinh viên biết code
-* Giải cứu vô số project deadline
-* Truyền cảm hứng cho nhiều lập trình viên trẻ
+Sau khi pull image:
+
+```
+docker run -p 8080:8080 username/springboot-app
+```
+
+Truy cập ứng dụng:
+
+```
+http://localhost:8080
+```
 
 ---
 
-## 📞 Contact (trong lớp)
+# 📊 GitHub Actions
 
-* 🏫 Classroom: Phòng máy
-* ⏰ Online: Khi sinh viên bị lỗi code
-* 📢 Status: `Currently debugging student's code...`
+Có thể xem workflow chạy tại:
+
+```
+Repository → Actions
+```
+
+Mỗi lần push code lên `main`, workflow sẽ chạy tự động.
 
 ---
+
+# 🎯 Kết luận
+
+Bài tập này giúp:
+
+* Hiểu cách hoạt động của **CI/CD**
+* Tự động hóa build Docker image
+* Sử dụng **GitHub Actions** để deploy
+
+---
+
+# 👨‍💻 Author
+
+Sinh viên thực hiện bài tập GitHub Actions
+Trường **HUTECH - Đại học Công Nghệ TP.HCM**
+
+⭐ Nếu thấy repo hữu ích hãy cho repo một **Star** nhé!
