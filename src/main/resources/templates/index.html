@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dev Portal | Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Import font chữ chuyên dụng cho Code và UI */
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@400;600;800&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at top left, #1e1e2e, #0d1117);
+            color: #c9d1d9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Dòng code mờ mờ ở background tạo cảm giác Hacker/Dev */
+        .bg-code {
+            position: absolute;
+            top: 20px; left: 20px;
+            opacity: 0.04;
+            font-family: 'Fira Code', monospace;
+            font-size: 14px;
+            pointer-events: none;
+            z-index: 0;
+            white-space: pre-wrap;
+            color: #58a6ff;
+        }
+
+        /* Box chính mang dáng dấp cửa sổ hệ điều hành Mac/VS Code */
+        .dev-card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 650px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255,255,255,0.05) inset;
+            z-index: 1;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .dev-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 30px 60px -12px rgba(88, 166, 255, 0.2);
+            border-color: #58a6ff;
+        }
+
+        /* Thanh tiêu đề cửa sổ */
+        .window-header {
+            background: #21262d;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #30363d;
+        }
+
+        .mac-btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        .mac-btns span {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        .close { background: #ff5f56; }
+        .min { background: #ffbd2e; }
+        .max { background: #27c93f; }
+
+        .window-title {
+            flex-grow: 1;
+            text-align: center;
+            font-family: 'Fira Code', monospace;
+            font-size: 13px;
+            color: #8b949e;
+            margin-right: 44px; /* Để cân bằng với 3 nút mac-btns bên trái */
+        }
+
+        .card-body {
+            padding: 40px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            background: rgba(46, 160, 67, 0.15);
+            color: #3fb950;
+            border: 1px solid rgba(46, 160, 67, 0.4);
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 25px;
+            letter-spacing: 0.5px;
+            box-shadow: 0 0 10px rgba(46, 160, 67, 0.2);
+        }
+
+        h1 {
+            font-size: 32px;
+            color: #f0f6fc;
+            margin: 0 0 12px 0;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        /* Chữ ký tự phát sáng đổi màu */
+        .name-highlight {
+            background: linear-gradient(120deg, #58a6ff, #bc8cff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+        }
+
+        p.subtitle {
+            color: #8b949e;
+            font-size: 16px;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        /* Khung Terminal mô phỏng console */
+        .terminal {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 18px;
+            font-family: 'Fira Code', monospace;
+            font-size: 14px;
+            color: #7ee787;
+            text-align: left;
+            margin-bottom: 30px;
+        }
+
+        .prompt-line { color: #c9d1d9; margin-bottom: 8px; }
+        .prompt-line::before {
+            content: "~/agrichain-project $ ";
+            color: #58a6ff;
+            font-weight: 500;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 16px;
+            background: #7ee787;
+            animation: blink 1s step-end infinite;
+            vertical-align: text-bottom;
+            margin-left: 5px;
+        }
+
+        @keyframes blink { 50% { opacity: 0; } }
+
+        /* Các kỹ năng IT / Stack */
+        .tech-stack {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .tech-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            background: #21262d;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #c9d1d9;
+            transition: all 0.2s ease;
+            cursor: default;
+        }
+
+        .tech-item:hover {
+            background: #30363d;
+            transform: translateY(-3px);
+            border-color: #8b949e;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .tech-item i { font-size: 15px; }
+        .fa-java { color: #b07219; }
+        .fa-database { color: #336791; }
+        .fa-mobile-screen { color: #54c5f8; }
+        .fa-link { color: #8c8273; }
+    </style>
+</head>
+<body>
+
+<div class="bg-code">
+    @SpringBootApplication
+    public class BackendApplication {
+    public static void main(String[] args) {
+    SpringApplication.run(BackendApplication.class, args);
+    }
+    }
+    // Connecting to PostgreSQL...
+    // Web3 Provider Initialized...
+</div>
+
+<div class="dev-card">
+    <div class="window-header">
+        <div class="mac-btns">
+            <span class="close"></span>
+            <span class="min"></span>
+            <span class="max"></span>
+        </div>
+        <div class="window-title">System.out.println("Hello World");</div>
+    </div>
+
+    <div class="card-body">
+        <div class="status-badge">
+            <i class="fa-solid fa-circle-check"></i> BUILD SUCCESSFUL (PORT 8080)
+        </div>
+
+        <h1>Xin chào, <span class="name-highlight" th:text="${name}">Dev</span>! 🚀</h1>
+        <p class="subtitle">Hệ thống đã biên dịch thành công. Chào mừng bạn quay trở lại với không gian lập trình.</p>
+
+        <div class="terminal">
+            <div class="prompt-line">mvn spring-boot:run</div>
+            <div style="margin-bottom: 8px; color: #a5d6ff;">[INFO] Starting Application on dev-machine...</div>
+            <div style="margin-bottom: 8px;">[INFO] Tomcat initialized with port(s): 8080 (http)</div>
+            <div class="prompt-line" style="color: #7ee787;">echo "Ready to code"<span class="cursor"></span></div>
+        </div>
+
+        <div class="tech-stack">
+            <div class="tech-item"><i class="fa-brands fa-java"></i> Spring Boot</div>
+            <div class="tech-item"><i class="fa-solid fa-database"></i> PostgreSQL</div>
+            <div class="tech-item"><i class="fa-solid fa-mobile-screen"></i> Flutter</div>
+            <div class="tech-item"><i class="fa-solid fa-link"></i> Blockchain</div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
